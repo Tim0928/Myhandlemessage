@@ -10,6 +10,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -22,7 +24,7 @@ public class MessengerService extends Service {
     private Handler handler;
 
     private Messenger mServiceMessenger;
-
+    private static final Random mGenerator = new Random();
 
     @Override
     public void onCreate() {
@@ -47,10 +49,28 @@ public class MessengerService extends Service {
                     Log.i("MessengerService","handleMessage");
                     MyDao bookDao = MainActivity.getmyAppDatabase().myDao();
                     Book bookinfo=new Book();
-                    bookinfo.setId(1);
+//                    bookinfo.setId(1);
+//                    bookinfo.setBook_name("123");
+//                    bookinfo.setBook_conext("123");
+//                    bookDao.addbook(bookinfo);
+
+                    bookinfo.setId(mGenerator.nextInt(100));
                     bookinfo.setBook_name("123");
                     bookinfo.setBook_conext("123");
                     bookDao.addbook(bookinfo);
+
+
+                    String info="";
+                    //users=MainActivity.myAppDatabase.myDao().getbook();
+                    List<Book> users=bookDao.getbook();
+                    for(Book user:users){
+                        int id=user.getId();
+                        String  name=user.getBook_name();
+                        String  email=user.getBook_conext();
+                        info =info+"\n\n"+"Id :"+id+"\n Book_Name :"+name+"\n context :"+email;
+                    }
+                    Log.i("MessengerService","succeed ReaduserTolog");
+                    Log.i("MessengerService",info);
 
 //                    Executor myExecutor = Executors.newSingleThreadExecutor();
 //                    myExecutor.execute(() -> {
