@@ -10,6 +10,12 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
+
 public class MessengerService extends Service {
     private Messenger mActivityMessenger;
 
@@ -22,6 +28,7 @@ public class MessengerService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i("TAG", "onCreate()");
+       //myAppDatabase=Room.databaseBuilder(getApplicationContext(),(, "bookdb").allowMainThreadQueries().build();
 
         /**
          * HandlerThread是Android系统专门为Handler封装的一个线程类，
@@ -38,6 +45,18 @@ public class MessengerService extends Service {
             public void handleMessage(Message msg) {
                 if(msg.what == 0x11){
                     Log.i("MessengerService","handleMessage");
+                    MyDao bookDao = MainActivity.getmyAppDatabase().myDao();
+                    Book bookinfo=new Book();
+                    bookinfo.setId(1);
+                    bookinfo.setBook_name("123");
+                    bookinfo.setBook_conext("123");
+                    bookDao.addbook(bookinfo);
+
+//                    Executor myExecutor = Executors.newSingleThreadExecutor();
+//                    myExecutor.execute(() -> {
+//                        userList = bookDao.getAll();
+//                        isQueryUserFinish =true;
+//                    });
 
                     if(mActivityMessenger == null) {
                         mActivityMessenger = msg.replyTo;//訊息 reply
@@ -54,7 +73,7 @@ public class MessengerService extends Service {
                     //发送结果回Activity
                     Message message = this.obtainMessage();
                     message.what = 0x12;
-                    message.arg1 = msg.arg1 + msg.arg2;
+                    message.arg1 = msg.arg1 + msg.arg2;//小資料的相加 可以用obj傳大資料
                     try {
                         mActivityMessenger.send(message);
                     } catch (RemoteException e) {

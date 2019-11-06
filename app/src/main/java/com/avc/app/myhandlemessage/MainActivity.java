@@ -1,6 +1,7 @@
 package com.avc.app.myhandlemessage;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -12,11 +13,15 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static Mydatabase myAppDatabase;
+
     private Button sendToServiceBtn;
 
     //Service端的Messenger对象
@@ -32,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             if(msg.what == 0x12){
+                Log.i("MessengerService","Handler");
                 Toast.makeText(MainActivity.this, "Service:"
                         + msg.arg1,Toast.LENGTH_SHORT).show();
             }
@@ -56,10 +62,22 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
+    public static Mydatabase getmyAppDatabase() {
+
+        if(myAppDatabase!=null){
+            return myAppDatabase;
+        }else{
+            return null;
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //載入 database
+        myAppDatabase=Room.databaseBuilder(getApplicationContext(),Mydatabase.class,"bookdb").allowMainThreadQueries().build();
+
 
         sendToServiceBtn = (Button) findViewById(R.id.btn_sendToService);
         sendToServiceBtn.setOnClickListener(new View.OnClickListener() {
@@ -67,9 +85,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //Activity端的Messenger
                 if(mActivityMessenger == null) {
-                    mActivityMessenger = new Messenger(handler);
+                    mActivityMessenger = new Messenger(handler);//這裡把ui更新的覆份實做出來
                 }
-
 
                 //创建消息
                 Message message = Message.obtain();
@@ -88,6 +105,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
 
         //绑定Service
         Intent intent = new Intent(MainActivity.this, MessengerService.class);
